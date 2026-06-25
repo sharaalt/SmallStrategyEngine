@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="SmallStrategyEngine.vcxproj" Id="4055c7f6-a4d4-47ea-a75c-406b484f7515" />
+</Solution>
