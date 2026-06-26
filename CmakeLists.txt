@@ -1,0 +1,52 @@
+cmake_minimum_required(VERSION 3.13)
+
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Release>:Release>")
+
+project(main1)
+set(CMAKE_CXX_STANDARD 17)
+
+set(SDL_SHARED OFF CACHE BOOL "Build shared SDL library" FORCE)
+set(SDL_STATIC ON CACHE BOOL "Build static SDL library" FORCE)
+
+set(SDL_TESTS OFF CACHE BOOL "Build SDL test programs" FORCE)
+
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/include/SDL3")
+
+set(IMGUI_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/ImGui")
+
+set(IMGUI_SOURCES
+    ${IMGUI_DIR}/imgui.cpp
+    ${IMGUI_DIR}/imgui_demo.cpp
+    ${IMGUI_DIR}/imgui_draw.cpp
+    ${IMGUI_DIR}/imgui_tables.cpp
+    ${IMGUI_DIR}/imgui_widgets.cpp
+
+    ${IMGUI_DIR}/misc/cpp/imgui_stdlib.cpp
+    ${IMGUI_DIR}/imgui_impl_sdlrenderer3.cpp
+    ${IMGUI_DIR}/imgui_impl_sdl3.cpp
+)
+
+add_library(imgui STATIC ${IMGUI_SOURCES})
+
+target_include_directories(imgui PUBLIC 
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${IMGUI_DIR}
+    ${IMGUI_DIR}/backends
+    ${IMGUI_DIR}/misc/cpp
+)
+target_link_libraries(imgui PUBLIC SDL3::SDL3-static)
+
+set(ENTT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/include/entt")
+add_library(entt INTERFACE)
+
+target_include_directories(entt INTERFACE ${ENTT_DIR}/src)
+
+file(GLOB PROJECT_SOURCES 
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.hpp"
+)
+
+add_executable(main1 ${PROJECT_SOURCES})
+
+target_link_libraries(main1 PRIVATE imgui entt)
