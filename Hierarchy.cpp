@@ -17,7 +17,7 @@
 /*
 	@brief Initalize's the Hierarchy GUI.
 */
-HierarchyGUI::HierarchyGUI() { /* Long story short this is a waste of space */ }
+HierarchyGUI::HierarchyGUI(SceneManager& scene) : scene(&scene) { /* Long story short this is a waste of space */ }
 
 // =======================
 // ===== Public API ======
@@ -37,12 +37,20 @@ void HierarchyGUI::DisplayGUI() {
 	entt::registry* registry = scene->GetRegistry();
 
 	for (auto entity : registry->view<GameObject>()) {
+		// Base Properties
+		auto& Object = registry->get<GameObject>(entity);
+
+		if (Object.isChild) {
+			continue;
+		}
+
+		auto& Color = registry->get<Color3>(entity);
+		auto& Position = registry->get<Vector2>(entity);
+
 		auto id = entt::to_integral(entity);
 
 		ImGui::PushID(id);
 
-		auto Object = registry->get<GameObject>(entity);
-		
 		std::string nodeLabel = std::string(Object.ObjectName) + "###Node_";
 
 		static bool isDisabled = false;
@@ -102,9 +110,9 @@ void HierarchyGUI::DisplayGUI() {
 			ImGui::Text("General Data:");
 			ImGui::InputText("Object Name", &Object.ObjectName);
 			ImGui::SameLine(); HelpMarker("Set's the Object name.");
-			ImGui::ColorEdit4("Color:", Object.Color);
+			ImGui::ColorEdit4("Color:", Color.rgba);
 			ImGui::SameLine(); HelpMarker("Set's the Object colour.");
-			ImGui::InputFloat2("Position:", Object.Position);
+			ImGui::InputFloat2("Position:", Position.position);
 			ImGui::SameLine(); HelpMarker("Set's the Object position.");
 
 			// Children
@@ -115,11 +123,13 @@ void HierarchyGUI::DisplayGUI() {
 			}
 
 			// Opens the modal for creating children.
-			this->CreateObjectModal(&Object);
+			this->CreateObjectModal(&entity);
 
-			// Renders children nodes.
-			for (auto node : Object.children) {
-				this->RenderNode(*node);
+			if (auto* childNodes = registry->try_get<Parent>(entity)) {
+				// Renders children nodes.
+				for (auto node : childNodes->children) {
+					this->RenderNode(node);
+				}
 			}
  
 			// Pop's the lolipop.
@@ -167,7 +177,7 @@ void HierarchyGUI::CreateObjectModal() {
 			if (buff[0] != '\0') {
 				std::string objName(buff);
 
-				scene->CreateEntity(&objName, color, position);
+				scene->CreateEntity(&objName, false, color, position);
 
 				//newObject->ObjectName = buff;
 				//
@@ -193,7 +203,7 @@ void HierarchyGUI::CreateObjectModal() {
 /*
 	@brief Helper function to create a popup modal for children nodes.
 */
-void HierarchyGUI::CreateObjectModal(GameObject* parentObj) {
+void HierarchyGUI::CreateObjectModal(entt::entity* parentObj) {
 	// The basis for object creation.
 	if (ImGui::BeginPopupModal("New Object", nullptr, ImGuiWindowFlags_AlwaysAutoResize)) {
 		static std::string buff = "";
@@ -219,18 +229,16 @@ void HierarchyGUI::CreateObjectModal(GameObject* parentObj) {
 
 		if (ImGui::Button("Create")) {
 			if (buff[0] != '\0') {
-				GameObject* newObject = new GameObject();
-				newObject->ObjectName = buff;
+				entt::registry* view = scene->GetRegistry();
+				entt::entity* child = scene->CreateEntity(&buff, true, color, position);
+				//entt::entity objEntity = scene->GetEntity(parentObj->ObjectName);
 				
-				for (int i = 0; i < 4; i++) {
-					newObject->Color[i] = color[i];
+				if (!view->all_of<Parent>(*parentObj)) {
+					scene->AddComponent<Parent>(*parentObj, *parentObj, std::vector<entt::entity>());
 				}
 
-				for (int i = 0; i < 2; i++) {
-					newObject->Position[i] = position[i];
-				}
-
-				parentObj->AddChild(newObject);
+				auto& parentComp = view->get<Parent>(*parentObj);
+				parentComp.children.push_back(*child);
 
 				ImGui::CloseCurrentPopup();
 			}
@@ -258,18 +266,29 @@ void HierarchyGUI::HelpMarker(const char* desc)
 /*
 	@brief Display's children using a Depth First Search algoritihm.
 */
-void HierarchyGUI::RenderNode(GameObject& node) {
+void HierarchyGUI::RenderNode(entt::entity& node) {
+	entt::registry* view = scene->GetRegistry();
+
+	// Base Properties
+	auto& gameObj = view->get<GameObject>(node);
+	auto& Color = view->get<Color3>(node);
+	auto& Position = view->get<Vector2>(node);
+
+	auto id = entt::to_integral(node);
+
 	// What does this do? Something.
-	bool opened = ImGui::TreeNode((void*)&node, "%s", node.ObjectName.c_str());
+	bool opened = ImGui::TreeNode((void*)&node, "%s", gameObj.ObjectName.c_str());
 
 	if (opened) {
+		ImGui::PushID(id);
+
 		// General Data
 		ImGui::Text("General Data:");
-		ImGui::InputText("Object Name", &node.ObjectName);
+		ImGui::InputText("Object Name", &gameObj.ObjectName);
 		ImGui::SameLine(); HelpMarker("Set's the Object name.");
-		ImGui::ColorEdit4("Color:", node.Color);
+		ImGui::ColorEdit4("Color:", Color.rgba);
 		ImGui::SameLine(); HelpMarker("Set's the Object colour.");
-		ImGui::InputFloat2("Position:", node.Position);
+		ImGui::InputFloat2("Position:", Position.position);
 		ImGui::SameLine(); HelpMarker("Set's the Object position.");
 
 		// Children
@@ -283,9 +302,13 @@ void HierarchyGUI::RenderNode(GameObject& node) {
 		this->CreateObjectModal(&node);
 
 		// If there's any children we also render them DFS algorithim for the win!
-		for (auto child : node.children) {
-			this->RenderNode(*child);
+		if (auto* childNodes = view->try_get<Parent>(node)) {
+			for (auto nextChild : childNodes->children) {
+				this->RenderNode(nextChild);
+			}
 		}
+
+		ImGui::PopID();
 
 		// Pop the lolipop!
 		ImGui::TreePop();

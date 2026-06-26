@@ -12,13 +12,13 @@
 
 class HierarchyGUI {
 	public:
-		HierarchyGUI();
+		HierarchyGUI(SceneManager& scene);
 		void DisplayGUI();
 	private:	
 		void CreateObjectModal();
-		void CreateObjectModal(GameObject* parentObj);
+		void CreateObjectModal(entt::entity* parentObj);
 		void HelpMarker(const char* desc);
-		void RenderNode(GameObject& node);
+		void RenderNode(entt::entity& node);
 
 		SceneManager* scene;
 		//std::vector<GameObject*> GameObjects;

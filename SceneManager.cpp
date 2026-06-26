@@ -6,21 +6,24 @@
 /*
 	@breif Create's a new entity and push's it to the back of the cache.
 */
-void SceneManager::CreateEntity(const std::string* objectName, const float* color, const float* position) {
+entt::entity* SceneManager::CreateEntity(const std::string* objectName, bool isChild, const float* color, const float* position) {
 	entt::entity newEntity = registry.create();
 
+	registry.emplace<GameObject>(newEntity, GameObject{ *objectName, isChild });
 	registry.emplace<Vector2>(newEntity, position[0], position[1]);
 	registry.emplace<Color3>(newEntity, color[0], color[1], color[2], color[3]);
+
+	return &newEntity;
 }
 
 /*
 	@brief Add's a new component to an already existing entity.
 */
-template<typename T>
-void SceneManager::AddComponent(entt::entity* entity, const T& component) {
-	// We assume the prototyped parameter has already been assigned data.
-	registry.emplace<T>(entity);
-};
+//template<typename T, typename... Args>
+//void SceneManager::AddComponent(entt::entity* entity, Args&&... args) {
+//	// We assume the prototyped parameter has already been assigned data.
+//	registry.emplace<T>(entity, std::forward<Args>(args)...);
+//};
 
 /*
 	@brief Remove's a component from an already existing entity.

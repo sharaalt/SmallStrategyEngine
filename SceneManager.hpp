@@ -9,10 +9,14 @@
 class SceneManager {
 	public:
 		// Entity Functions
-		void CreateEntity(const std::string* objectName, const float* color, const float* position);
+		entt::entity* CreateEntity(const std::string* objectName, bool isChild, const float* color, const float* position);
 
-		template<typename T>
-		void AddComponent(entt::entity* entity, const T& parameter);
+		template<typename T, typename... Args>
+		void AddComponent(entt::entity entity, Args&&... args) {
+			// We assume the prototyped parameter has already been assigned data.
+			registry.emplace<T>(entity, std::forward<Args>(args)...);
+		};
+
 		template<typename T>
 		void RemoveComponent(entt::entity* entity, const T& component);
 		entt::entity GetEntity(std::string& EntityName);

@@ -11,41 +11,30 @@
 // Base Components
 struct GameObject {
 	std::string ObjectName;
-	float Color[4];
-	float Position[2];
+	bool isChild = false;
 
-	std::vector<GameObject*> children;
-
-	void AddChild(GameObject* child) {
-		if (child) {
-			children.emplace_back(child);
-		}
-	};
-
-	std::vector<GameObject*> GetChildren() {
-		return children;
+	GameObject(const std::string& name, const bool child) {
+		ObjectName = name;
+		isChild = child;
 	}
 };
 
 struct Parent {
-	entt::entity handle;
+	entt::entity parentObj;
+	std::vector<entt::entity> children;
 };
 
 // Components
 struct Color3 {
-	float r = 0.0f;
-	float g = 0.0f;
-	float b = 0.0f;
-	float a = 0.0f;
+	float rgba[4];
 };
 
 struct Vector2 {
-	float x = 0.0f;
-	float y = 0.0f;
+	float position[2];
 
-	std::vector<float> returnVector() {
-		return { x, y };
-	}
+	//std::vector<float> returnVector() {
+	//	return { x, y };
+	//}
 };
 
 

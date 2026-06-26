@@ -1,4 +1,5 @@
 #include "Hierarchy.hpp"
+#include "SceneManager.hpp"
 
 #include <ImGui/imgui.h>
 #include <ImGui/imgui_impl_sdl3.h>
@@ -21,7 +22,8 @@ int main() {
 	SDL_Renderer* renderer = SDL_CreateRenderer(window, NULL); // Why was this the issue? We'll never know.
 
 	// GUI Objects
-	HierarchyGUI hierarchy;
+	SceneManager scene;
+	HierarchyGUI hierarchy{ scene };
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
