@@ -13,6 +13,7 @@
 class HierarchyGUI {
 	public:
 		HierarchyGUI(SceneManager& scene);
+		~HierarchyGUI();
 		void DisplayGUI();
 	private:	
 		void CreateObjectModal();

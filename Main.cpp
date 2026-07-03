@@ -1,5 +1,6 @@
 #include "Hierarchy.hpp"
 #include "SceneManager.hpp"
+#include "RenderManager.hpp"
 
 #include <ImGui/imgui.h>
 #include <ImGui/imgui_impl_sdl3.h>
@@ -24,6 +25,11 @@ int main() {
 	// GUI Objects
 	SceneManager scene;
 	HierarchyGUI hierarchy{ scene };
+	RenderManager rendrr{ window };
+
+	RenderObject obj{ 50,50,50,50 };
+
+	rendrr.AddToBatch(obj);
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();

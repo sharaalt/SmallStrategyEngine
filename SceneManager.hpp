@@ -2,8 +2,16 @@
 #define SCENEMANAGER_HPP
 
 #include "Definitions.hpp"
+#include <chrono>
+#include <ctime>
+#include <format>
+#include <typeinfo>
+#include <fstream>
+#include <filesystem>
 #include <iostream>
 #include <entt/entt.hpp>
+#include <ryml/ryml.hpp>
+#include <c4/substr.hpp>
 #include <entt/entity/registry.hpp>
 
 class SceneManager {
@@ -22,9 +30,12 @@ class SceneManager {
 		entt::entity GetEntity(std::string& EntityName);
 
 		// Registry Functions
+		void SaveScene();
+		void LoadScene();
 		entt::registry* GetRegistry();
 	private:
 		entt::registry registry;
+		std::string GetTimeStamp();
 };
 
 #endif // !SCENEMANAGER_HPP

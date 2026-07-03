@@ -8,6 +8,19 @@
 #ifndef DEFINITIONS_HPP
 #define DEFINITIONS_HPP
 
+// Renderer Definitions
+struct RenderObject {
+	SDL_Rect object;
+
+	SDL_Rect* returnObject() {
+		return &object;
+	};
+
+	RenderObject(int x, int y, int w, int h) {
+		object = SDL_Rect{ x, y, w, h };
+	}
+};
+
 // Base Components
 struct GameObject {
 	std::string ObjectName;

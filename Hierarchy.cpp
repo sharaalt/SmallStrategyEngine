@@ -296,7 +296,7 @@ void HierarchyGUI::RenderNode(entt::entity& node) {
 
 		// Allow for additional components/objects
 		if (ImGui::Button("Add Component")) {
-			ImGui::OpenPopup("New Object");
+			ImGui::OpenPopup(" New Object");
 		}
 
 		this->CreateObjectModal(&node);
@@ -314,3 +314,10 @@ void HierarchyGUI::RenderNode(entt::entity& node) {
 		ImGui::TreePop();
 	}
 };
+
+/*
+	@brief Saves the hierarchy to the file.
+*/
+HierarchyGUI::~HierarchyGUI() {
+	scene->SaveScene();
+}
